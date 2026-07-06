@@ -1,0 +1,18 @@
+{
+  "name": "@v8/billing-service",
+  "version": "8.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@v8/control-data": "8.0.0",
+    "@v8/shared": "8.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2"
+  }
+}

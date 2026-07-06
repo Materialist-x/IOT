@@ -1,0 +1,61 @@
+.tenant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.license,
+.quota,
+.portal-table {
+  background: white;
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.license,
+.quota {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.tenant-grid svg {
+  color: #2f9c95;
+}
+
+.tenant-grid span {
+  color: #657481;
+}
+
+.tenant-grid strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.portal-table {
+  grid-column: span 2;
+}
+
+.portal-table h3 {
+  margin: 0 0 12px;
+}
+
+.portal-table p {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-top: 1px solid #edf1f4;
+  margin: 0;
+  padding: 12px 0;
+}
+
+@media (max-width: 760px) {
+  .tenant-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-table {
+    grid-column: span 1;
+  }
+}

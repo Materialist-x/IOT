@@ -1,0 +1,27 @@
+{
+  "name": "v8-industrial-iot-cloud-platform",
+  "version": "8.0.0",
+  "private": true,
+  "description": "Distributed Industrial IoT Cloud Platform V8",
+  "workspaces": [
+    "packages/*",
+    "v8-scada-ui",
+    "services/*",
+    "frontend/*"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "dev:gateway": "npm --workspace services/gateway-service run dev",
+    "dev:tcp": "npm --workspace services/tcp-gateway run dev",
+    "dev:stream": "npm --workspace services/stream-engine run dev"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  }
+}

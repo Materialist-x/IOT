@@ -1,0 +1,48 @@
+.operator-view {
+  display: grid;
+  gap: 12px;
+}
+
+.work-card,
+.task {
+  background: #ffffff;
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.work-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.work-card svg,
+.task svg {
+  color: #2f9c95;
+}
+
+.work-card span {
+  color: #657481;
+}
+
+.work-card strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.task {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.task button {
+  border: 0;
+  border-radius: 8px;
+  background: #2f9c95;
+  color: white;
+  padding: 9px 12px;
+  cursor: pointer;
+}

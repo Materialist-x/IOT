@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D868E331-76D3-485B-B08F-3E09AEED57A3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Project2</RootNamespace>
+    <AssemblyName>Project2</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Api\HistoryController.cs" />
+    <Compile Include="Api\LicenseController.cs" />
+    <Compile Include="Core\BatchWriter.cs" />
+    <Compile Include="Core\BillingEngine.cs" />
+    <Compile Include="Core\ChannelQueue.cs" />
+    <Compile Include="Core\ChannelQueueOptions.cs" />
+    <Compile Include="Core\CommandService.cs" />
+    <Compile Include="Core\IChannelQueue.cs" />
+    <Compile Include="Core\IBulkTagValueRepository.cs" />
+    <Compile Include="Core\InMemoryBulkTagValueRepository.cs" />
+    <Compile Include="Core\LicenseService.cs" />
+    <Compile Include="Core\MemoryCache.cs" />
+    <Compile Include="Core\MessageBus.cs" />
+    <Compile Include="Core\MessageDispatcher.cs" />
+    <Compile Include="Core\IMessageBus.cs" />
+    <Compile Include="Core\ProtocolEngine.cs" />
+    <Compile Include="Core\RateLimiter.cs" />
+    <Compile Include="Core\RealtimeHub.cs" />
+    <Compile Include="Core\RbacService.cs" />
+    <Compile Include="Core\ScadaRuntime.cs" />
+    <Compile Include="Core\ScadaRuntimeOptions.cs" />
+    <Compile Include="Core\SessionManager.cs" />
+    <Compile Include="Core\StabilityTestHarness.cs" />
+    <Compile Include="Core\TagEngine.cs" />
+    <Compile Include="Core\TenantResolver.cs" />
+    <Compile Include="Core\UnifiedTcpServer.cs" />
+    <Compile Include="Logging\ConsoleLogger.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Models\CommandStatus.cs" />
+    <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\DeviceSession.cs" />
+    <Compile Include="Models\DeviceStatus.cs" />
+    <Compile Include="Models\IncomingTcpMessage.cs" />
+    <Compile Include="Models\LicenseSubscription.cs" />
+    <Compile Include="Models\LicenseType.cs" />
+    <Compile Include="Models\MessageKind.cs" />
+    <Compile Include="Models\Permission.cs" />
+    <Compile Include="Models\PlanType.cs" />
+    <Compile Include="Models\ProtocolType.cs" />
+    <Compile Include="Models\Quality.cs" />
+    <Compile Include="Models\Role.cs" />
+    <Compile Include="Models\ScadaCommand.cs" />
+    <Compile Include="Models\TagValue.cs" />
+    <Compile Include="Models\Tenant.cs" />
+    <Compile Include="Models\TenantStatus.cs" />
+    <Compile Include="History\InfluxService.cs" />
+    <Compile Include="Protocol\Parsers\DLT645Parser.cs" />
+    <Compile Include="Protocol\Parsers\IProtocolParser.cs" />
+    <Compile Include="Protocol\Parsers\JsonParser.cs" />
+    <Compile Include="Protocol\Parsers\ModbusParser.cs" />
+    <Compile Include="Protocol\ProtocolDispatcher.cs" />
+    <Compile Include="Protocol\TcpGateway.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Realtime\RedisService.cs" />
+    <Compile Include="Realtime\WebSocketHub.cs" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

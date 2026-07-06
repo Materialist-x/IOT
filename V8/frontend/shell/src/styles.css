@@ -1,0 +1,447 @@
+:root {
+  color: #172026;
+  background: #eef2f5;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.app {
+  min-width: 0;
+  padding: 24px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+header p {
+  margin: 0 0 4px;
+  color: #64727f;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status,
+.mode,
+.top-nav button {
+  background: #ffffff;
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+.status.ok {
+  color: #0f7d5c;
+}
+
+.mode {
+  color: #42505c;
+}
+
+.mode.active,
+.top-nav button.active {
+  background: #2f9c95;
+  color: white;
+}
+
+.top-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.top-nav button {
+  color: #42505c;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.login-panel,
+.panel {
+  background: white;
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.login-panel {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.login-panel h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 0;
+}
+
+.login-hint {
+  margin: 0;
+  color: #657481;
+  line-height: 1.6;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.segmented button {
+  background: #f4f7f9;
+  color: #42505c;
+  border: 1px solid #d9e1e8;
+}
+
+.segmented button.active {
+  background: #2f9c95;
+  color: white;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+input {
+  border: 1px solid #c8d3dc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+select {
+  border: 1px solid #c8d3dc;
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  background: #2f9c95;
+  cursor: pointer;
+}
+
+.runtime-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.form-panel form {
+  display: grid;
+  gap: 14px;
+}
+
+.table-panel {
+  min-width: 0;
+  overflow: auto;
+}
+
+.side-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.scada-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tag-panel {
+  grid-column: 2;
+}
+
+.panel-title,
+.panel h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.panel h2,
+.panel-title h2 {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.panel-title h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title span {
+  color: #657481;
+}
+
+.device-list {
+  display: grid;
+  gap: 10px;
+}
+
+.device-list div,
+.alarm {
+  display: grid;
+  gap: 4px;
+  background: #f4f7f9;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+th,
+td {
+  text-align: left;
+  border-bottom: 1px solid #edf1f4;
+  padding: 11px 8px;
+}
+
+th {
+  color: #657481;
+  font-size: 13px;
+}
+
+.text-button {
+  padding: 7px 10px;
+  color: #2f6f73;
+  background: #e7f4f2;
+}
+
+.scada-canvas-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid #cfd9e2;
+  background:
+    linear-gradient(#e5edf3 1px, transparent 1px),
+    linear-gradient(90deg, #e5edf3 1px, transparent 1px),
+    #f9fbfc;
+  background-size: 24px 24px;
+}
+
+.scada-canvas {
+  position: relative;
+  transform-origin: top left;
+}
+
+.scada-widget {
+  position: absolute;
+  contain: layout paint style;
+}
+
+.scada-widget.editor {
+  outline: 1px dashed #2f9c95;
+  outline-offset: 2px;
+}
+
+.widget-unknown,
+.gauge-widget,
+.chart-widget {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  border: 1px solid #d6e0e8;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(23, 32, 38, 0.06);
+  padding: 14px;
+}
+
+.widget-title {
+  color: #42505c;
+  font-weight: 800;
+}
+
+.gauge-widget {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  text-align: center;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 120px;
+  overflow: visible;
+}
+
+.gauge-track,
+.gauge-zone {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.gauge-track {
+  stroke: #e6edf2;
+}
+
+.normal-zone {
+  stroke: #3da477;
+}
+
+.warn-zone {
+  stroke: #d6a72c;
+}
+
+.danger-zone {
+  stroke: #c94537;
+}
+
+.gauge-needle {
+  stroke: #1f2c36;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform-origin: 110px 120px;
+  transition: transform 280ms ease;
+}
+
+.gauge-hub {
+  fill: #1f2c36;
+}
+
+.gauge-value strong {
+  font-size: 32px;
+  letter-spacing: 0;
+}
+
+.gauge-value span {
+  margin-left: 4px;
+  color: #657481;
+}
+
+.gauge-scale {
+  display: flex;
+  justify-content: space-between;
+  color: #657481;
+  font-size: 12px;
+}
+
+.gauge-widget.danger {
+  animation: alarmPulse 900ms infinite alternate;
+}
+
+.chart-widget {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 8px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100%;
+  min-height: 130px;
+}
+
+.chart-grid line {
+  stroke: #e7eef4;
+  stroke-width: 1;
+}
+
+.chart-line {
+  fill: none;
+  stroke: #2f9c95;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: d 180ms ease;
+}
+
+.chart-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #657481;
+}
+
+.chart-meta strong {
+  color: #172026;
+}
+
+@keyframes alarmPulse {
+  from {
+    border-color: #c94537;
+    box-shadow: 0 0 0 rgba(201, 69, 55, 0);
+  }
+  to {
+    border-color: #c94537;
+    box-shadow: 0 0 20px rgba(201, 69, 55, 0.28);
+  }
+}
+
+@media (max-width: 980px) {
+  .runtime-layout,
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tag-panel {
+    grid-column: auto;
+  }
+
+  .app {
+    padding: 16px;
+  }
+
+  header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

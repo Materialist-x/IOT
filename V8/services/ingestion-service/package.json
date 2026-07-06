@@ -1,0 +1,17 @@
+{
+  "name": "@v8/ingestion-service",
+  "version": "8.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -b tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@v8/shared": "8.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2"
+  }
+}

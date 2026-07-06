@@ -1,0 +1,25 @@
+services:
+  v7:
+    build: ./v7-backend
+    container_name: v7-iot
+    ports:
+      - "9000:9000"
+
+  v8:
+    build: ./v8-frontend
+    container_name: v8-scada
+    ports:
+      - "5173:80"
+    depends_on:
+      - v7
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: scada-platform-nginx
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - v7
+      - v8

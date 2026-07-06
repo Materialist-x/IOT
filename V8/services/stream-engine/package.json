@@ -1,0 +1,19 @@
+{
+  "name": "@v8/stream-engine",
+  "version": "8.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -b tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.35.0",
+    "ioredis": "^5.4.1",
+    "@v8/shared": "8.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2"
+  }
+}

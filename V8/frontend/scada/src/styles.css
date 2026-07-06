@@ -1,0 +1,118 @@
+.scada-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.overview,
+.panel {
+  background: #ffffff;
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.overview {
+  grid-column: span 12;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  background: #2f6f73;
+}
+
+.overview p,
+.overview h2 {
+  margin: 0;
+}
+
+.overview h2 {
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
+.panel {
+  grid-column: span 6;
+}
+
+.process {
+  grid-column: span 12;
+}
+
+.panel h3 {
+  margin: 0 0 14px;
+  font-size: 17px;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr 60px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.machine {
+  min-height: 86px;
+  border: 1px solid #c7d2db;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  color: #22313d;
+}
+
+.flow {
+  height: 4px;
+  background: #2f9c95;
+}
+
+.tag-list {
+  display: grid;
+  gap: 8px;
+}
+
+.tag-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr 0.7fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f4f7f9;
+}
+
+.tag-row code {
+  color: #b44232;
+}
+
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.device-grid article {
+  border: 1px solid #d9e1e8;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.device-grid span,
+.tag-row small {
+  color: #657481;
+}
+
+@media (max-width: 900px) {
+  .panel {
+    grid-column: span 12;
+  }
+
+  .line,
+  .tag-row {
+    grid-template-columns: 1fr;
+  }
+
+  .flow {
+    display: none;
+  }
+}
