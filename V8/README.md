@@ -15,6 +15,8 @@ Services:
 - Gateway metadata API: http://localhost:8080
 - SignalR hub: http://localhost:8090/tenant/T1/tags
 - RabbitMQ management: http://localhost:15672 (`v8` / `v8_password`)
+- MQTT broker: `localhost:1883`
+- EMQX dashboard: http://localhost:18083 (`admin` / `v8_mqtt_password`)
 - Redis: `localhost:6379`
 - PostgreSQL: `localhost:5432`
 - InfluxDB: http://localhost:8086
@@ -72,3 +74,12 @@ The V8 frontend exposes cloud-managed edge configuration screens:
 - Device configuration includes activation code, protocol, host, port, enable state, and location.
 - Tag polling configuration includes address, register type, data type, interval, retry, timeout, enable state, multiplier, and offset.
 - Runtime tag values keep the raw value and apply `displayValue = rawValue * multiplier + offset` in the frontend store before display.
+- Gateway config endpoints provide versioned config management:
+  - `POST /api/config`
+  - `GET /api/config/:deviceId/:kind`
+  - `POST /api/config/rollback`
+  - `GET /api/config/:deviceId/:kind/diff`
+- Edge upload endpoints accept cloud bridge packets:
+  - `POST /api/edge/tag`
+  - `POST /api/edge/alarm`
+  - `POST /api/edge/device`

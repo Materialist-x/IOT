@@ -16,6 +16,22 @@ services:
       timeout: 5s
       retries: 10
 
+  mqtt-broker:
+    image: emqx/emqx:5.8.4
+    restart: always
+    environment:
+      EMQX_NODE__COOKIE: v8_edge_cookie
+      EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: v8_mqtt_password
+    ports:
+      - "1883:1883"
+      - "18083:18083"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/emqx/bin/emqx_ctl status"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   redis:
     image: redis:7-alpine
     restart: always
@@ -139,12 +155,15 @@ services:
       POSTGRES_PASSWORD: v8_password
       POSTGRES_DB: v8_platform
       RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      MQTT_URL: mqtt://mqtt-broker:1883
     ports:
       - "8080:8080"
     depends_on:
       postgresql:
         condition: service_healthy
       message-broker:
+        condition: service_healthy
+      mqtt-broker:
         condition: service_healthy
 
   frontend:

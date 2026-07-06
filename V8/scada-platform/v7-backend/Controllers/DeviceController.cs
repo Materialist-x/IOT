@@ -13,8 +13,9 @@ public class DeviceController : ControllerBase
     private readonly TagEngineService _tagEngine;
     private readonly DeviceHealthMonitor _health;
     private readonly FaultEngine _faults;
+    private readonly PollingScheduler _scheduler;
 
-    public DeviceController(DeviceService devices, LicenseService licenses, TagService tags, TagEngineService tagEngine, DeviceHealthMonitor health, FaultEngine faults)
+    public DeviceController(DeviceService devices, LicenseService licenses, TagService tags, TagEngineService tagEngine, DeviceHealthMonitor health, FaultEngine faults, PollingScheduler scheduler)
     {
         _devices = devices;
         _licenses = licenses;
@@ -22,6 +23,7 @@ public class DeviceController : ControllerBase
         _tagEngine = tagEngine;
         _health = health;
         _faults = faults;
+        _scheduler = scheduler;
     }
 
     [HttpGet]
@@ -54,6 +56,7 @@ public class DeviceController : ControllerBase
             var license = _licenses.Activate(request.LicenseCode);
             var device = _devices.Upsert(request);
             _tags.UpsertForDevice(device);
+            _scheduler.RegisterDevice(device);
             var updatedLicense = _licenses.UpdateActiveDevices(_devices.GetAll().Count);
             await _tagEngine.BroadcastLicenseAsync(updatedLicense with
             {

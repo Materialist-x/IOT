@@ -135,9 +135,6 @@ namespace Project2.Core
             var tcpServer = new UnifiedTcpServer(
                 sessionManager,
                 channelQueue,
-                licenseService,
-                tenantResolver,
-                billingEngine,
                 logger);
             var tcpGateway = new TcpGateway(licenseService, sessionManager, protocolDispatcher, tagEngine);
 

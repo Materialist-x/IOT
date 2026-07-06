@@ -4,9 +4,9 @@ namespace V7Backend.Services;
 
 public class IoSchedulerWorker : BackgroundService
 {
-    private readonly IoScheduler _scheduler;
+    private readonly PollingScheduler _scheduler;
 
-    public IoSchedulerWorker(IoScheduler scheduler)
+    public IoSchedulerWorker(PollingScheduler scheduler)
     {
         _scheduler = scheduler;
     }

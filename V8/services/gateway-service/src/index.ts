@@ -7,6 +7,17 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { createPool } from "@v8/control-data";
 import { logger, requireEnv } from "@v8/shared";
+import {
+  AlarmPacket,
+  ConfigKind,
+  ConfigService,
+  DevicePacket,
+  DeviceShadowService,
+  InternalEventBus,
+  MetricsService,
+  MqttService,
+  TagPacket
+} from "./cloud-services.js";
 
 type JwtClaims = {
   sub: string;
@@ -16,6 +27,11 @@ type JwtClaims = {
 
 const pool = createPool();
 const app = express();
+const eventBus = new InternalEventBus();
+const mqtt = new MqttService(eventBus);
+const configs = new ConfigService();
+const shadows = new DeviceShadowService();
+const metrics = new MetricsService();
 app.use(helmet());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
@@ -24,6 +40,48 @@ app.use(rateLimit({ windowMs: 60_000, limit: 600, standardHeaders: true, legacyH
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8)
+});
+
+const configKindSchema = z.enum(["device", "polling", "alarm"]);
+const configSchema = z.object({
+  tenantId: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  kind: configKindSchema,
+  config: z.unknown()
+});
+
+const rollbackSchema = z.object({
+  tenantId: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  kind: configKindSchema,
+  version: z.number().int().positive()
+});
+
+const tagPacketSchema = z.object({
+  tenantId: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  tagId: z.string().optional(),
+  tagName: z.string().optional(),
+  value: z.union([z.number(), z.string(), z.boolean()]),
+  quality: z.string().optional(),
+  ts: z.union([z.number(), z.string()]).optional()
+});
+
+const alarmPacketSchema = z.object({
+  tenantId: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  tagId: z.string().optional(),
+  level: z.string().optional(),
+  message: z.string().min(1),
+  ts: z.union([z.number(), z.string()]).optional()
+});
+
+const devicePacketSchema = z.object({
+  tenantId: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  status: z.string().min(1),
+  health: z.union([z.number(), z.string()]).optional(),
+  lastSeen: z.string().optional()
 });
 
 function signToken(claims: JwtClaims): string {
@@ -112,6 +170,105 @@ app.get("/api/public/devices", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+app.post("/api/config", requireAuth, requireRole("platform_admin", "tenant_admin"), (req, res, next) => {
+  try {
+    const body = configSchema.parse(req.body);
+    const tenantId = body.tenantId ?? req.user!.tenantId;
+    const version = configs.upsert(tenantId, body.deviceId, body.kind as ConfigKind, body.config);
+    mqtt.publishConfig(version);
+    if (body.kind === "device" && typeof body.config === "object" && body.config !== null && "activationCode" in body.config) {
+      shadows.bindActivation(tenantId, body.deviceId, String((body.config as { activationCode?: unknown }).activationCode ?? ""));
+    }
+    res.status(201).json({ config: version });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/config/:deviceId/:kind", requireAuth, (req, res, next) => {
+  try {
+    const kind = configKindSchema.parse(req.params.kind);
+    res.json({
+      latest: configs.latest(req.user!.tenantId, req.params.deviceId, kind),
+      history: configs.history(req.user!.tenantId, req.params.deviceId, kind)
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/config/rollback", requireAuth, requireRole("platform_admin", "tenant_admin"), (req, res, next) => {
+  try {
+    const body = rollbackSchema.parse(req.body);
+    const tenantId = body.tenantId ?? req.user!.tenantId;
+    const version = configs.rollback(tenantId, body.deviceId, body.kind, body.version);
+    if (!version) {
+      res.status(404).json({ error: "config_version_not_found" });
+      return;
+    }
+    mqtt.publishConfig(version);
+    res.json({ config: version });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/config/:deviceId/:kind/diff", requireAuth, (req, res, next) => {
+  try {
+    const kind = configKindSchema.parse(req.params.kind);
+    const from = Number(req.query.from);
+    const to = Number(req.query.to);
+    res.json({ diff: configs.diff(req.user!.tenantId, req.params.deviceId, kind, from, to) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/edge/tag", (req, res, next) => {
+  try {
+    const packet = tagPacketSchema.parse(req.body) as TagPacket;
+    const tenantId = packet.tenantId ?? "T1";
+    shadows.touchTag(tenantId, packet.deviceId);
+    metrics.observePacket(tenantId, packet.deviceId, packet.ts);
+    mqtt.publishEdgePacket("v7/tag/update", { ...packet, tenantId });
+    res.status(202).json({ accepted: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/edge/alarm", (req, res, next) => {
+  try {
+    const packet = alarmPacketSchema.parse(req.body) as AlarmPacket;
+    const tenantId = packet.tenantId ?? "T1";
+    metrics.observePacket(tenantId, packet.deviceId, packet.ts);
+    mqtt.publishEdgePacket("v7/alarm/event", { ...packet, tenantId });
+    res.status(202).json({ accepted: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/edge/device", (req, res, next) => {
+  try {
+    const packet = devicePacketSchema.parse(req.body) as DevicePacket;
+    const tenantId = packet.tenantId ?? "T1";
+    const shadow = shadows.updateFromPacket(tenantId, packet);
+    mqtt.publishEdgePacket("v7/device/status", { ...packet, tenantId });
+    res.status(202).json({ accepted: true, shadow });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/device-shadow", requireAuth, (req, res) => {
+  res.json({ devices: shadows.list(req.user!.tenantId) });
+});
+
+app.get("/api/observability/metrics", requireAuth, requireRole("platform_admin", "tenant_admin"), (_req, res) => {
+  res.json({ latency: metrics.snapshot() });
 });
 
 app.get("/api/licenses/current", requireAuth, async (req, res, next) => {

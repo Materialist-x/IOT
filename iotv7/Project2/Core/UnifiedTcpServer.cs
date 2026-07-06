@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using Project2.Logging;
 using Project2.Models;
 
@@ -12,25 +14,16 @@ namespace Project2.Core
     {
         private readonly SessionManager _sessionManager;
         private readonly IChannelQueue _channelQueue;
-        private readonly LicenseService _licenseService;
-        private readonly TenantResolver _tenantResolver;
-        private readonly BillingEngine _billingEngine;
         private readonly ILogger _logger;
         private TcpListener _listener;
 
         public UnifiedTcpServer(
             SessionManager sessionManager,
             IChannelQueue channelQueue,
-            LicenseService licenseService,
-            TenantResolver tenantResolver,
-            BillingEngine billingEngine,
             ILogger logger)
         {
             _sessionManager = sessionManager;
             _channelQueue = channelQueue;
-            _licenseService = licenseService;
-            _tenantResolver = tenantResolver;
-            _billingEngine = billingEngine;
             _logger = logger;
         }
 
@@ -71,7 +64,7 @@ namespace Project2.Core
         {
             var tcpIdentity = ExtractTcpIdentity(client);
             DeviceSession session = null;
-            var tenantId = "unresolved";
+            var tenantId = "default";
             var deviceId = tcpIdentity.RemoteEndpointKey;
 
             try
@@ -92,22 +85,11 @@ namespace Project2.Core
 
                         var payload = new byte[bytesRead];
                         Buffer.BlockCopy(buffer, 0, payload, 0, bytesRead);
-                        var identity = _tenantResolver.Resolve(tcpIdentity, payload);
-                        tenantId = identity.TenantId;
-                        deviceId = identity.DeviceId;
+                        ApplyPayloadIdentity(payload, ref tenantId, ref deviceId);
 
                         if (session == null)
                         {
-                            if (!_tenantResolver.IsTenantActive(tenantId) ||
-                                !_licenseService.CheckOnConnect(tenantId, deviceId) ||
-                                !_billingEngine.TryRegisterDevice(tenantId, deviceId))
-                            {
-                                client.Close();
-                                return;
-                            }
-
                             session = _sessionManager.Register(tenantId, deviceId, client);
-                            _billingEngine.ConnectionOpened(tenantId);
                         }
 
                         var message = new IncomingTcpMessage(
@@ -135,7 +117,6 @@ namespace Project2.Core
                 {
                     _sessionManager.MarkOffline(tenantId, deviceId);
                     _channelQueue.StopDevice(tenantId, deviceId);
-                    _billingEngine.ConnectionClosed(tenantId);
                 }
             }
         }
@@ -167,6 +148,44 @@ namespace Project2.Core
             }
 
             return MessageKind.Data;
+        }
+
+        private static void ApplyPayloadIdentity(byte[] payload, ref string tenantId, ref string deviceId)
+        {
+            if (payload == null || payload.Length == 0 || payload[0] != (byte)'{')
+            {
+                return;
+            }
+
+            try
+            {
+                var json = System.Text.Encoding.UTF8.GetString(payload);
+                var serializer = new JavaScriptSerializer();
+                var envelope = serializer.Deserialize<Dictionary<string, object>>(json);
+
+                object value;
+                if (envelope.TryGetValue("tenantId", out value) || envelope.TryGetValue("TenantId", out value))
+                {
+                    var nextTenant = Convert.ToString(value);
+                    if (!string.IsNullOrWhiteSpace(nextTenant))
+                    {
+                        tenantId = nextTenant;
+                    }
+                }
+
+                if (envelope.TryGetValue("deviceId", out value) || envelope.TryGetValue("DeviceId", out value))
+                {
+                    var nextDevice = Convert.ToString(value);
+                    if (!string.IsNullOrWhiteSpace(nextDevice))
+                    {
+                        deviceId = nextDevice;
+                    }
+                }
+            }
+            catch
+            {
+                // Identity extraction is best-effort. Protocol parsers own payload validation.
+            }
         }
     }
 }
