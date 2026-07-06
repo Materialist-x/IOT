@@ -8,6 +8,29 @@ Minimal runnable distributed Industrial IoT V8 system.
 docker compose up --build
 ```
 
+## VM one-line deployment
+
+On a fresh Linux VM, run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Materialist-x/IOT/main/scripts/iotctl.sh | sudo bash -s -- deploy
+```
+
+Later updates are one command:
+
+```bash
+sudo iotctl update
+```
+
+Useful operations:
+
+```bash
+sudo iotctl status
+sudo iotctl logs
+sudo iotctl restart
+sudo iotctl down
+```
+
 Services:
 
 - Frontend: http://localhost:3000

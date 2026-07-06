@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: v8
-      RABBITMQ_DEFAULT_PASS: v8_password
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-v8_password}
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -22,7 +22,7 @@ services:
     environment:
       EMQX_NODE__COOKIE: v8_edge_cookie
       EMQX_DASHBOARD__DEFAULT_USERNAME: admin
-      EMQX_DASHBOARD__DEFAULT_PASSWORD: v8_mqtt_password
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_DASHBOARD_PASSWORD:-v8_mqtt_password}
     ports:
       - "1883:1883"
       - "18083:18083"
@@ -48,7 +48,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: v8
-      POSTGRES_PASSWORD: v8_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-v8_password}
       POSTGRES_DB: v8_platform
     ports:
       - "5432:5432"
@@ -67,10 +67,10 @@ services:
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup
       DOCKER_INFLUXDB_INIT_USERNAME: v8
-      DOCKER_INFLUXDB_INIT_PASSWORD: v8_password_123
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_PASSWORD:-v8_password_123}
       DOCKER_INFLUXDB_INIT_ORG: v8
       DOCKER_INFLUXDB_INIT_BUCKET: telemetry
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: v8-influx-token
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN:-v8-influx-token}
     ports:
       - "8086:8086"
     volumes:
@@ -87,7 +87,7 @@ services:
       dockerfile: services/tcp-gateway/Dockerfile
     restart: always
     environment:
-      RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      RABBITMQ_URL: amqp://v8:${RABBITMQ_DEFAULT_PASS:-v8_password}@message-broker:5672
       TCP_GATEWAY_PORT: 9000
       DEFAULT_TENANT_ID: T1
       DEFAULT_DEVICE_ID: DEV001
@@ -104,7 +104,7 @@ services:
       dockerfile: services/ingestion-service/Dockerfile
     restart: always
     environment:
-      RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      RABBITMQ_URL: amqp://v8:${RABBITMQ_DEFAULT_PASS:-v8_password}@message-broker:5672
     depends_on:
       message-broker:
         condition: service_healthy
@@ -115,10 +115,10 @@ services:
       dockerfile: services/stream-engine/Dockerfile
     restart: always
     environment:
-      RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      RABBITMQ_URL: amqp://v8:${RABBITMQ_DEFAULT_PASS:-v8_password}@message-broker:5672
       REDIS_URL: redis://redis:6379
       INFLUX_URL: http://influxdb:8086
-      INFLUX_TOKEN: v8-influx-token
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-v8-influx-token}
       INFLUX_ORG: v8
       INFLUX_BUCKET: telemetry
     depends_on:
@@ -135,7 +135,7 @@ services:
       dockerfile: services/signalr-service/Dockerfile
     restart: always
     environment:
-      RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      RABBITMQ_URL: amqp://v8:${RABBITMQ_DEFAULT_PASS:-v8_password}@message-broker:5672
     ports:
       - "8090:8080"
     depends_on:
@@ -148,13 +148,13 @@ services:
       dockerfile: services/gateway-service/Dockerfile
     restart: always
     environment:
-      JWT_SECRET: replace-with-a-long-random-secret
+      JWT_SECRET: ${JWT_SECRET:-replace-with-a-long-random-secret}
       POSTGRES_HOST: postgresql
       POSTGRES_PORT: 5432
       POSTGRES_USER: v8
-      POSTGRES_PASSWORD: v8_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-v8_password}
       POSTGRES_DB: v8_platform
-      RABBITMQ_URL: amqp://v8:v8_password@message-broker:5672
+      RABBITMQ_URL: amqp://v8:${RABBITMQ_DEFAULT_PASS:-v8_password}@message-broker:5672
       MQTT_URL: mqtt://mqtt-broker:1883
     ports:
       - "8080:8080"

@@ -1,7 +1,9 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-ENV VITE_API_BASE_URL=http://localhost:8080
-ENV VITE_SIGNALR_URL=http://localhost:8090
+ARG VITE_API_BASE_URL=
+ARG VITE_SIGNALR_URL=
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_SIGNALR_URL=${VITE_SIGNALR_URL}
 COPY . .
 RUN npm install
 RUN npm --workspace v8-scada-ui run build
