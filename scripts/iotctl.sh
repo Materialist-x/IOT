@@ -76,6 +76,21 @@ install_docker() {
 
 install_self() {
   log "Installing iotctl command to $BIN_PATH"
+  local local_script="$APP_DIR/scripts/iotctl.sh"
+  local source_script=""
+
+  if [[ -f "$local_script" ]]; then
+    source_script="$local_script"
+  elif [[ -n "${BASH_SOURCE[0]:-}" && -f "${BASH_SOURCE[0]}" ]]; then
+    source_script="${BASH_SOURCE[0]}"
+  fi
+
+  if [[ -n "$source_script" ]]; then
+    $SUDO install -m 0755 "$source_script" "$BIN_PATH"
+    return
+  fi
+
+  warn "Local iotctl script was not found. Falling back to $RAW_URL"
   curl -fsSL "$RAW_URL" -o /tmp/iotctl.sh
   $SUDO install -m 0755 /tmp/iotctl.sh "$BIN_PATH"
 }
@@ -83,6 +98,7 @@ install_self() {
 clone_or_update_repo() {
   if [[ -d "$APP_DIR/.git" ]]; then
     log "Updating repository in $APP_DIR"
+    $SUDO git config --global --add safe.directory "$APP_DIR" >/dev/null 2>&1 || true
     $SUDO git -C "$APP_DIR" fetch origin "$BRANCH"
     $SUDO git -C "$APP_DIR" checkout "$BRANCH"
     $SUDO git -C "$APP_DIR" pull --ff-only origin "$BRANCH"
@@ -145,16 +161,16 @@ EOF
 cmd_deploy() {
   install_core_packages
   install_docker
-  install_self
   clone_or_update_repo
+  install_self
   deploy_stack
 }
 
 cmd_update() {
   install_core_packages
   install_docker
-  install_self
   clone_or_update_repo
+  install_self
   deploy_stack
 }
 
