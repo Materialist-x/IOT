@@ -114,9 +114,13 @@ function remapTagsWithConfig(tags: Record<string, Record<string, TagValue>>, con
 }
 
 function normalizeTagConfig(config: TagConfig): TagConfig {
+  if (!config.assetId) {
+    throw new Error("Tag config must bind to an asset.");
+  }
   return {
     ...config,
     tagName: config.tagName.trim(),
+    assetId: config.assetId,
     address: config.address.trim(),
     interval: Math.max(100, Number(config.interval) || 1000),
     retry: Math.max(0, Number(config.retry) || 0),

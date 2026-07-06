@@ -42,6 +42,11 @@ const loginSchema = z.object({
   password: z.string().min(8)
 });
 
+const licenseActivationSchema = z.object({
+  code: z.string().min(3),
+  deviceId: z.string().min(1)
+});
+
 const configKindSchema = z.enum(["device", "polling", "alarm"]);
 const configSchema = z.object({
   tenantId: z.string().min(1).optional(),
@@ -278,6 +283,24 @@ app.get("/api/licenses/current", requireAuth, async (req, res, next) => {
       [req.user!.tenantId]
     );
     res.json({ license: result.rows[0] ?? null });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/license/activate", (req, res, next) => {
+  try {
+    const body = licenseActivationSchema.parse(req.body);
+    const valid = /^V8-[A-Z0-9-]{4,}$/.test(body.code.trim().toUpperCase());
+    if (!valid) {
+      res.status(400).json({ valid: false, message: "激活码无效或格式不正确" });
+      return;
+    }
+    res.json({
+      valid: true,
+      licenseKey: body.code.trim().toUpperCase(),
+      deviceId: body.deviceId
+    });
   } catch (error) {
     next(error);
   }

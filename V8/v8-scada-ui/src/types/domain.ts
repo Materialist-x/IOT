@@ -13,6 +13,7 @@ export type Device = {
   id: string;
   name: string;
   protocol: "json" | "modbus" | "dlt645";
+  assetId?: string;
   activationCode?: string;
   host?: string;
   port?: number;
@@ -25,6 +26,7 @@ export type Device = {
 export type TagValue = {
   deviceId: string;
   tagName: string;
+  assetId?: string;
   rawValue?: number | string;
   value: number | string;
   timestamp: string;
@@ -35,6 +37,7 @@ export type TagValue = {
 
 export type TagConfig = {
   deviceId: string;
+  assetId?: string;
   tagName: string;
   address: string;
   registerType: "holding" | "input" | "coil" | "discrete" | "json";

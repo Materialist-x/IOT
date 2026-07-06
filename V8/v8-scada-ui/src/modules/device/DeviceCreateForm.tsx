@@ -1,19 +1,48 @@
 import { FormEvent, useState } from "react";
 import { Plus } from "lucide-react";
 import { hasPermission } from "../../core/permission/permission";
+import { LicenseService } from "../license/license.service";
 import { useDeviceStore } from "../../store/deviceStore";
 import { Device } from "../../types/domain";
 
-export function DeviceCreateForm() {
+export function DeviceCreateForm({ parentAssetId, parentLocation }: { parentAssetId?: string; parentLocation?: string }) {
   const addDevice = useDeviceStore((state) => state.addDevice);
   const canAdd = hasPermission("device:add");
   const [form, setForm] = useState<Device>(createEmptyDevice());
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(event: FormEvent): void {
+  async function submit(event: FormEvent): Promise<void> {
     event.preventDefault();
+    setError("");
     if (!canAdd || !form.id || !form.name) return;
-    addDevice({ ...form, status: form.enable === false ? "disabled" : "online", lastSeen: new Date().toISOString() });
-    setForm(createEmptyDevice());
+    if (!parentAssetId) {
+      setError("请先在左侧选择一个工厂、区域或设备节点。");
+      return;
+    }
+    if (!form.activationCode?.trim()) {
+      setError("创建设备必须填写激活码。");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await LicenseService.activateDevice(form.activationCode.trim(), form.id.trim());
+      addDevice({
+        ...form,
+        id: form.id.trim(),
+        name: form.name.trim(),
+        assetId: `asset-${form.id.trim()}`,
+        status: form.enable === false ? "disabled" : "online",
+        location: form.location || parentLocation || "默认产线",
+        lastSeen: new Date().toISOString()
+      });
+      setForm(createEmptyDevice());
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "激活码校验失败。");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -32,7 +61,8 @@ export function DeviceCreateForm() {
       <label>通信端口<input disabled={!canAdd} type="number" min={0} value={form.port ?? ""} onChange={(event) => setForm({ ...form, port: Number(event.target.value) || undefined })} placeholder="例如 502" /></label>
       <label>安装位置<input disabled={!canAdd} value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} /></label>
       <label className="check-row"><input disabled={!canAdd} type="checkbox" checked={form.enable !== false} onChange={(event) => setForm({ ...form, enable: event.target.checked, status: event.target.checked ? "online" : "disabled" })} />启用设备</label>
-      <button type="submit" disabled={!canAdd}><Plus size={16} />创建设备</button>
+      <button type="submit" disabled={!canAdd || submitting || !parentAssetId}><Plus size={16} />{submitting ? "校验激活码" : "创建设备"}</button>
+      {error ? <p className="form-error">{error}</p> : null}
       {!canAdd ? <p className="muted">当前账号没有创建设备权限。</p> : null}
     </form>
   );

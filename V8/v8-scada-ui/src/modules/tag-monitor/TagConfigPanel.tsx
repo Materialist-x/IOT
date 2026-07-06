@@ -5,23 +5,27 @@ import { useDeviceStore } from "../../store/deviceStore";
 import { useTagStore } from "../../store/tagStore";
 import { TagConfig } from "../../types/domain";
 
-export function TagConfigPanel() {
+export function TagConfigPanel({ assetId, deviceId }: { assetId?: string; deviceId?: string }) {
   const devices = useDeviceStore((state) => state.devices);
   const tagConfigs = useTagStore((state) => state.tagConfigs);
   const upsertTagConfig = useTagStore((state) => state.upsertTagConfig);
   const removeTagConfig = useTagStore((state) => state.removeTagConfig);
   const canEdit = hasPermission("tag:edit");
   const deviceIds = useMemo(() => {
-    const ids = new Set([...devices.map((device) => device.id), ...tagConfigs.map((config) => config.deviceId)]);
+    const ids = new Set([
+      ...devices.map((device) => device.id),
+      ...tagConfigs.map((config) => config.deviceId)
+    ]);
     return Array.from(ids);
   }, [devices, tagConfigs]);
-  const [form, setForm] = useState<TagConfig>(() => createEmptyConfig(deviceIds[0] ?? "DEV001"));
+  const visibleConfigs = deviceId ? tagConfigs.filter((config) => config.deviceId === deviceId) : tagConfigs;
+  const [form, setForm] = useState<TagConfig>(() => createEmptyConfig(deviceId ?? deviceIds[0] ?? "DEV001", assetId));
 
   function submit(event: FormEvent): void {
     event.preventDefault();
-    if (!canEdit || !form.deviceId || !form.tagName || !form.address) return;
-    upsertTagConfig(form);
-    setForm(createEmptyConfig(form.deviceId));
+    if (!canEdit || !form.deviceId || !form.tagName || !form.address || !form.assetId) return;
+    upsertTagConfig({ ...form, deviceId: deviceId ?? form.deviceId, assetId: assetId ?? form.assetId });
+    setForm(createEmptyConfig(deviceId ?? form.deviceId, assetId));
   }
 
   function editConfig(config: TagConfig): void {
@@ -32,8 +36,9 @@ export function TagConfigPanel() {
     <section className="tag-config-layout">
       <form className="panel stack-form tag-config-form" onSubmit={submit}>
         <h2>Tag 采集配置</h2>
+        {!assetId ? <p className="muted">请先选择设备资产，Tag 必须绑定资产节点。</p> : null}
         <label>设备
-          <select disabled={!canEdit} value={form.deviceId} onChange={(event) => setForm({ ...form, deviceId: event.target.value })}>
+          <select disabled={!canEdit || Boolean(deviceId)} value={deviceId ?? form.deviceId} onChange={(event) => setForm({ ...form, deviceId: event.target.value })}>
             {deviceIds.map((deviceId) => <option value={deviceId} key={deviceId}>{deviceId}</option>)}
             {!deviceIds.length ? <option value="DEV001">DEV001</option> : null}
           </select>
@@ -70,7 +75,7 @@ export function TagConfigPanel() {
         </div>
         <label>解析偏移<input disabled={!canEdit} type="number" step="0.0001" value={form.offset} onChange={(event) => setForm({ ...form, offset: Number(event.target.value) })} /></label>
         <label className="check-row"><input disabled={!canEdit} type="checkbox" checked={form.enable} onChange={(event) => setForm({ ...form, enable: event.target.checked })} />启用采集</label>
-        <button type="submit" disabled={!canEdit}>{existingConfig(tagConfigs, form) ? <Check size={16} /> : <Plus size={16} />}{existingConfig(tagConfigs, form) ? "保存配置" : "添加配置"}</button>
+        <button type="submit" disabled={!canEdit || !assetId}>{existingConfig(tagConfigs, form) ? <Check size={16} /> : <Plus size={16} />}{existingConfig(tagConfigs, form) ? "保存配置" : "添加配置"}</button>
         {!canEdit ? <p className="muted">当前账号没有修改 Tag 配置权限。</p> : null}
       </form>
 
@@ -82,7 +87,7 @@ export function TagConfigPanel() {
               <tr><th>设备</th><th>Tag</th><th>地址</th><th>类型</th><th>周期</th><th>解析倍数</th><th>偏移</th><th>状态</th><th>操作</th></tr>
             </thead>
             <tbody>
-              {tagConfigs.map((config) => (
+              {visibleConfigs.map((config) => (
                 <tr key={`${config.deviceId}-${config.tagName}`}>
                   <td>{config.deviceId}</td>
                   <td>{config.tagName}</td>
@@ -98,7 +103,7 @@ export function TagConfigPanel() {
                   </td>
                 </tr>
               ))}
-              {tagConfigs.length === 0 ? <tr><td colSpan={9} className="muted">暂无 Tag 配置</td></tr> : null}
+              {visibleConfigs.length === 0 ? <tr><td colSpan={9} className="muted">暂无 Tag 配置</td></tr> : null}
             </tbody>
           </table>
         </div>
@@ -107,9 +112,10 @@ export function TagConfigPanel() {
   );
 }
 
-function createEmptyConfig(deviceId: string): TagConfig {
+function createEmptyConfig(deviceId: string, assetId?: string): TagConfig {
   return {
     deviceId,
+    assetId,
     tagName: "",
     address: "",
     registerType: "holding",
